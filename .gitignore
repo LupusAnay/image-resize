@@ -117,3 +117,6 @@ dmypy.json
 
 # PyCharm
 .idea
+
+# Images
+images
