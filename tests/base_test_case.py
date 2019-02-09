@@ -10,7 +10,7 @@ class BaseTestCase(TestCase):
 
     def setUp(self):
         self.logger = current_app.logger
-        pass
+        self.logger.info('Test execution started')
 
     def tearDown(self):
-        pass
+        self.logger.info('Test execution finished')

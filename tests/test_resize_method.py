@@ -1,5 +1,3 @@
-from flask import Response
-
 from tests.base_test_case import BaseTestCase
 
 

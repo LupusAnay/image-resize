@@ -23,7 +23,6 @@ class TestStatusMethod(BaseTestCase):
         self.assert200(response_1)
         data = response_1.get_json()
         self.assertIn(data['status'], states)
-        self.logger.info(data['status'])
 
         time.sleep(0.1)
 
@@ -31,7 +30,6 @@ class TestStatusMethod(BaseTestCase):
         self.assert200(response_2)
         data = response_2.get_json()
         self.assertIn(data['status'], states)
-        self.logger.info(data['status'])
 
     def test_status_with_invalid_id(self):
         invalid_id = uuid.uuid4()
