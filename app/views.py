@@ -21,6 +21,12 @@ status_blueprint = Blueprint('status', __name__, url_prefix='/status')
 
 @operation_blueprint.route('/resize', methods=['POST'])
 def process() -> Response:
+    """
+    Takes file with multipart/form-data format and creates async task to
+    resize it
+
+    :return: Sends response to client
+    """
     current_app.logger.info('Attempt to create resizing task')
     if 'file' not in request.files:
         current_app.logger.warning(
@@ -76,6 +82,14 @@ def process() -> Response:
 
 @operation_blueprint.route('/result/<uuid:task_id>', methods=['GET'])
 def result(task_id: UUID) -> Response:
+    """
+    Accepts the task ID and returns the result. The result does not exist if
+    the task identifier is invalid, or if the task has not been completed
+
+    :param task_id: UUID of the task
+    :return: Response with task result or 404 error
+    """
+
     current_app.logger.info(f'Attempt to get task result with id: {task_id}')
 
     task_result = tasks.celery.AsyncResult(str(task_id))
@@ -108,6 +122,12 @@ def result(task_id: UUID) -> Response:
 
 @status_blueprint.route('/<uuid:task_id>', methods=['GET'])
 def task_status(task_id: UUID) -> Response:
+    """
+    Returns task state or 404 if task does not exist
+
+    :param task_id: UUID of the task
+    :return: Response with task state or 404 error
+    """
     current_app.logger.info(f'Attempt to get task status with id: {task_id}')
 
     task_result = tasks.celery.AsyncResult(str(task_id))

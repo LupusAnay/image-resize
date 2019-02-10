@@ -1,0 +1,52 @@
+version: '3'
+
+networks:
+  BACKEND:
+
+services:
+  uwsgi:
+    container_name: uwsgi
+    restart: always
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: uwsgi
+    volumes:
+      - ./:/usr/src/app
+    ports:
+      - 5000
+    networks:
+      - BACKEND
+
+  celery:
+    container_name: celery
+    build: .
+    command: celery worker -l info -A app.tasks --uid uwsgi
+    volumes:
+      - .:/usr/src/app
+    image: celery
+    networks:
+      - BACKEND
+
+  redis-q:
+    container_name: redis-q
+    restart: always
+    build:
+      context: ./redis
+      dockerfile: Dockerfile
+    image: redis-q
+    ports:
+      - 6379
+    networks:
+      - BACKEND
+
+  nginx:
+    container_name: nginx
+    restart: always
+    image: nginx
+    volumes:
+      - ./nginx/app.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - 80:80
+    networks:
+      - BACKEND
