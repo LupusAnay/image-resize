@@ -1,6 +1,8 @@
 import time
 import uuid
 
+from flask import current_app
+
 from tests.base_test_case import BaseTestCase
 
 
@@ -9,10 +11,11 @@ class TestStatusMethod(BaseTestCase):
         super().setUp()
         file = {'width': 100,
                 'height': 100,
-                'file': open('images/henculus-avatar.jpg', 'rb')}
+                'file': open(current_app.config['TEST_IMAGE'], 'rb')}
         response = self.client.post('/operation/resize',
                                     content_type='multipart/form-data',
                                     data=file)
+        self.assertEqual(202, response.status_code)
 
         self.task_id = response.get_json()['task_id']
 
@@ -34,6 +37,6 @@ class TestStatusMethod(BaseTestCase):
     def test_status_with_invalid_id(self):
         invalid_id = uuid.uuid4()
         response = self.client.get(f'/status/{str(invalid_id)}')
-        self.logger.info(response.status_code)
+        self.assert404(response)
         data = response.get_json()
-        self.logger.info(data)
+        self.assertEqual('error', data['result'])

@@ -2,6 +2,7 @@ import os
 from uuid import UUID
 
 import celery
+import kombu
 from flask import (
     Blueprint, current_app, request, Response,
     after_this_request, send_from_directory
@@ -28,6 +29,7 @@ def process() -> Response:
 
     current_app.logger.info('Reading file')
     file: FileStorage = request.files['file']
+    current_app.logger.info(f'File name: {file.filename}')
 
     if file.filename == '':
         current_app.logger.warning("No file given: file.filename is ''")
@@ -45,17 +47,22 @@ def process() -> Response:
     if file and allowed_extension(file.filename):
         current_app.logger.info('Saving file')
         task_id = celery.uuid()
-        extension = file.filename.split('.')[1]
+        extension = file.filename.rsplit('.', 1)[1]
         filename = secure_filename(f'{task_id}.{extension}')
         file.save(os.path.join(config.upload_dir, filename))
         current_app.logger.info(f"File saved under name '{filename}'")
 
         current_app.logger.info('Creating celery task')
-        task: tasks.celery.Task = tasks.resize_image.apply_async(
-            args=[filename, w, h], task_id=task_id)
-        # Hack to be able to check the existence of the task:
-        # PENDING task state is equal not existing task
-        task.backend.store_result(task.id, None, 'SENT')
+        try:
+            task: tasks.celery.Task = tasks.resize_image.apply_async(
+                args=[filename, w, h], task_id=task_id)
+            # Hack to be able to check the existence of the task:
+            # PENDING task state is equal not existing task
+            task.backend.store_result(task.id, None, 'SENT')
+
+        except kombu.exceptions.OperationalError as e:
+            current_app.logger.critical(f'Cannot connect to redis: {e}')
+            return create_error_response(500, 'Server error')
 
         current_app.logger.info('Request accepted, task was sent into queue')
         return create_response(202,

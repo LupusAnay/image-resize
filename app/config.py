@@ -12,7 +12,8 @@ class BaseConfig:
 
 
 class TestingConfig(BaseConfig):
-    DEFAULT_TESTING_IMAGE_NAME = 'henculus-avatar.jpg'
+    TEST_DIR = '../tests/test_images/'
+    TEST_IMAGE = os.path.join(TEST_DIR, 'test.jpg')
     DEBUG = True
 
 

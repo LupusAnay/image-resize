@@ -8,12 +8,12 @@ def size_valid(data: dict) -> bool:
         if 0 < h <= 9999 and 0 < w < 9999:
             return True
         else:
-            current_app.logger.error(f"Invalid size parameters provided: "
-                                     f"wrong h: {h} "
-                                     f"or w: {w}")
+            current_app.logger.warning(f"Invalid size parameters provided: "
+                                       f"wrong h: {h} "
+                                       f"or w: {w}")
     else:
-        current_app.logger.error(f'Invalid size parameters provided: '
-                                 f'wrong json {data}')
+        current_app.logger.warning(f'Invalid size parameters provided: '
+                                   f'wrong json {data}')
     return False
 
 
@@ -33,5 +33,5 @@ def create_error_response(code: int, message: str) -> Response:
 
 
 def allowed_extension(file_name: str) -> bool:
-    return '.' in file_name and file_name.split('.')[1].lower() in \
+    return '.' in file_name and file_name.rsplit('.', 1)[1].lower() in \
            current_app.config.get('ALLOWED_EXTENSIONS')
