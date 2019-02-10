@@ -12,7 +12,7 @@ services:
       dockerfile: Dockerfile
     image: uwsgi
     volumes:
-      - ./:/usr/src/app
+      - ./:/usr/src/backend
     ports:
       - 5000
     networks:
@@ -23,7 +23,7 @@ services:
     build: .
     command: celery worker -l info -A app.tasks --uid uwsgi
     volumes:
-      - .:/usr/src/app
+      - .:/usr/src/backend
     image: celery
     networks:
       - BACKEND
